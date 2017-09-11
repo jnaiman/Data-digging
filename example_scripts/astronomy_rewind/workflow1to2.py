@@ -24,6 +24,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+
 def load_classifications(filename, json_columns=None):
     """
     Load classifications into pandas dataframe, cull only those retired.
@@ -228,6 +229,15 @@ def cull_export_by_workflow(filename, workflow_id=1701, id='wf1'):
     return newname
 
 
+def beta_test(username=None, password=None):
+    subject_set_ids = {'2a': 14635,
+                       '2b': 14636,
+                       '2c': 14637}
+    subject_set_file = 'astronomy-rewind-subject_ids_wf{:s}_beta.csv'
+    for wf, id in list(subject_set_ids.items()):
+        add_to_subject_set(id, subject_set_file.format(wf),
+                           username=username, password=password)
+
 def main(argv=None):
     """Main caller for workflow1to2"""
     parser = argparse.ArgumentParser(
@@ -239,17 +249,21 @@ def main(argv=None):
 
     parser.add_argument('-o', '--overwrite', action='store_true')
     parser.add_argument('-a', '--add', action='store_true')
+    parser.add_argument('-b', '--beta', action='store_true')
 
     args = parser.parse_args(argv)
 
-    # hard coded so others won't try to run this on their data without a deep
-    # dive.
-    classification_file = 'astronomy-rewind-classifications.csv'
+    if args.beta:
+        beta_test(username=args.username, password=args.password)
+    else:
+        # hard coded so others won't try to run this on their data without a deep
+        # dive.
+        classification_file = 'astronomy-rewind-classifications.csv'
 
-    wf1_filename = cull_export_by_workflow(classification_file)
-    cull_subject_ids(wf1_filename, overwrite=args.overwrite, add=args.add,
-                     add_kw={'username': args.username,
-                             'password': args.password})
+        wf1_filename = cull_export_by_workflow(classification_file)
+        cull_subject_ids(wf1_filename, overwrite=args.overwrite, add=args.add,
+                         add_kw={'username': args.username,
+                                 'password': args.password})
 
 
 if __name__ == "__main__":
